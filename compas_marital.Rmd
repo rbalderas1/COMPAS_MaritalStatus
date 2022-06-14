@@ -12,9 +12,13 @@ library(tidyverse)
 library(effects)
 ```
 
-The data we will use for the visualizations 
+### Roberto Balderas and Ernesto Delamaza
 
+***
 
+The data we will use for the visualizations https://raw.githubusercontent.com/propublica/compas-analysis/master/compas-scores-raw.csv
+
+***
 
 ```{r}
 # read data in
@@ -38,29 +42,54 @@ fta_data %>%
   distinct(Ethnic_Code_Text, race_ethnicity)
 ```
 ```{r}
+# create linear regression model
 marital_sex_model <- lm(DecileScore ~ MaritalStatus + Sex_Code_Text,
                         data = fta_data)
 
-marital_ethnicity_model <- lm(DecileScore ~ MaritalStatus + race_ethnicity,
-                              data = fta_data)
-
+# summary of the model
 summary(marital_sex_model)
-summary(marital_ethnicity_model)
-```
-```{r}
+
+# assign model data to a dataframe
 sex_model_df <- effect("MaritalStatus", marital_sex_model) %>% 
   data.frame()
 
-ethnicity_model_df <- effect("MaritalStatus", marital_ethnicity_model) %>% 
-  data.frame()
+sex_model_df
+```
+```{r}
+# count occurrences of each marital status
+marital_status_failure_to_appear <- fta_data %>%
+  count(MaritalStatus)
+
+# change column name
+colnames(marital_status_failure_to_appear)[colnames(marital_status_failure_to_appear) == "n"] <- "Occurrences"
+
 ```
 
 ```{r}
+# create a bar plot
+marital_status_failure_to_appear %>% 
+  ggplot(aes(y = reorder(MaritalStatus, Occurrences),
+             x = Occurrences)) +
+  geom_col() +
+  geom_label(aes(label = Occurrences)) +
+  labs(y = "Marital Status",
+       title = "Occurrences of Failure to Appear Based on Marital Status",
+       caption = "data from www.propublica.org")
 
 ```
 
 ```{r}
-
+# plot the linear regression model
+sex_model_df %>% 
+  ggplot(aes(y = reorder(MaritalStatus, fit),
+             x = fit,
+             xmin = lower,
+             xmax = upper)) +
+  geom_errorbar() +
+  geom_label(aes(label = format(fit, digits = 2))) +
+  labs(y = "Marital Status",
+       x = "average decile score for risk of failure to appear (1-10)",
+       caption = "data from www.propublica.org")
 ```
 
 
