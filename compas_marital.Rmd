@@ -92,4 +92,9 @@ sex_model_df %>%
        caption = "data from www.propublica.org")
 ```
 
+```{r}
+# save processed data to csv
+write_csv(fta_data, "processed-data/fta-marital-data.csv")
+```
+
 
