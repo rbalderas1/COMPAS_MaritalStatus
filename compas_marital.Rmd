@@ -1,0 +1,66 @@
+---
+title: "Compas Marital Status"
+authors: Roberto Balderas and Ernesto Delamaza
+output: html_document
+date: '2022-06-14'
+---
+
+```{r setup, include=FALSE}
+# load libraries
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(effects)
+```
+
+The data we will use for the visualizations 
+
+
+
+```{r}
+# read data in
+compas_data <- read_csv("raw-data/compas-scores-raw.csv")
+
+# filter data
+fta_data <- compas_data %>% 
+  filter(DisplayText == "Risk of Failure to Appear")
+
+fta_data %>% 
+  distinct(MaritalStatus)
+
+# fix categorical variables
+fta_data <- fta_data %>%
+  mutate(race_ethnicity = case_when(Ethnic_Code_Text == "Caucasian" ~ "White",
+                                    Ethnic_Code_Text == "African-Am" ~ "African American",
+                                    Ethnic_Code_Text == "Oriental" ~ "Asian",
+                                    TRUE ~ Ethnic_Code_Text))
+
+fta_data %>% 
+  distinct(Ethnic_Code_Text, race_ethnicity)
+```
+```{r}
+marital_sex_model <- lm(DecileScore ~ MaritalStatus + Sex_Code_Text,
+                        data = fta_data)
+
+marital_ethnicity_model <- lm(DecileScore ~ MaritalStatus + race_ethnicity,
+                              data = fta_data)
+
+summary(marital_sex_model)
+summary(marital_ethnicity_model)
+```
+```{r}
+sex_model_df <- effect("MaritalStatus", marital_sex_model) %>% 
+  data.frame()
+
+ethnicity_model_df <- effect("MaritalStatus", marital_ethnicity_model) %>% 
+  data.frame()
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
